@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EzzAlgo - Learn Algorithms with Interactive Visualizations",
+  title: "PESCA - Learn Algorithms with Interactive Visualizations",
   description: "An interactive platform for learning algorithms through visualization and practice",
 };
 

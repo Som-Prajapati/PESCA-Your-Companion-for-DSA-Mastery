@@ -1,6 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { signOut, useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,17 +78,47 @@ const menuItems: MenuItem[] = [
     label: "Sorting Algorithms",
     icon: <BarChart3 className="w-4 h-4 text-green-500" />,
     children: [
+      // O(n²) - Simple algorithms
       { id: "bubble-sort", label: "Bubble Sort" },
       { id: "selection-sort", label: "Selection Sort" },
       { id: "insertion-sort", label: "Insertion Sort" },
-      //uncomment when done
-      // { id: "merge-sort", label: "Merge Sort" },
-      // { id: "quick-sort", label: "Quick Sort" },
+      // O(n log n) - Efficient algorithms
       { id: "heap-sort", label: "Heap Sort" },
+      // O(n + k) - Non-comparison based
       { id: "count-sort", label: "Count Sort" },
       { id: "radix-sort", label: "Radix Sort" },
-      { id: "count-sort", label: "Count Sort" },
     ],  
+  },
+  {
+    id: "searching-algorithms",
+    label: "Searching Algorithms",
+    icon: <Search className="w-4 h-4 text-pink-500" />,
+    children: [
+      // O(n) - Linear time
+      { id: "linear-search", label: "Linear Search" },
+      // O(√n) - Square root time
+      { id: "jump-search", label: "Jump Search" },
+      // O(log n) - Logarithmic time
+      { id: "binary-search", label: "Binary Search" },
+      { id: "interpolation-search", label: "Interpolation Search" },
+    ],
+  },
+  {
+    id: "graph",
+    label: "Graph Algorithms",
+    icon: <GitBranch className="w-4 h-4 text-orange-500" />,
+    children: [
+      // O(V + E) - Linear in vertices and edges
+      { id: "bfs", label: "BFS" },
+      { id: "dfs", label: "DFS" },
+      // O(E log V) - Minimum spanning tree
+      { id: "prims", label: "Prims" },
+      { id: "kruskals", label: "Kruskals" },
+      // O((V + E) log V) - Shortest path
+      { id: "dijkstra", label: "Dijkstra" },
+      // O(V³) - All pairs shortest path
+      { id: "warshalls", label: "Floyd-Warshall" },
+    ],
   },
   {
     id: "data-structures",
@@ -97,36 +126,11 @@ const menuItems: MenuItem[] = [
     icon: <Binary className="w-4 h-4 text-purple-500" />,
   },
   {
-    id: "searching-algorithms",
-    label: "Searching Algorithms",
-    icon: <Search className="w-4 h-4 text-pink-500" />,
-    children: [
-      { id: "linear-search", label: "Linear Search" },
-      { id: "binary-search", label: "Binary Search" },
-      { id: "jump-search", label: "Jump Search" },
-      { id: "interpolation-search", label: "Interpolation Search" },
-      //uncomment when done
-      // { id: "exponential-search", label: "Exponential Search" },
-    ],
-  },
-  {
     id: "trees",
     label: "Trees",
     icon: <GitBranch className="w-4 h-4 text-orange-500" />,
     // children: [{ id: "binary-tree", label: "Binary Tree" }],
   },
-  {
-    id: "graph",
-    label: "Graph",
-    icon: <GitBranch className="w-4 h-4 text-orange-500" />,
-    children: [{ id: "bfs", label: "BFS" },
-      { id: "dfs", label: "DFS" },
-      { id: "prims", label: "Prims" },
-      { id: "kruskals", label: "Krushkals" },
-      { id: "dijkstra", label: "Dijkstra" },
-      { id: "warshalls", label: "Waarshalls" }
-    ],
-  }
 ];
 
 export default function SideContent({
@@ -448,7 +452,7 @@ export default function SideContent({
               {selectedAlgorithm === "binary" && "Binary Search"}
               {selectedAlgorithm === "count" && "Count Sort"}
               {/* Default title if no algorithm is selected */}
-              {!selectedAlgorithm && "Ezzalgo"}
+              {!selectedAlgorithm && "PESCA"}
             </span>
           </div>
           {/* Right side - buttons and user avatar */}
@@ -562,7 +566,7 @@ export default function SideContent({
               {/* Default title if no algorithm is selected */}
               {!selectedAlgorithm ||
                 (selectedAlgorithm === "bubble" && "Bubble Sort")}
-              {!selectedAlgorithm && "Ezzalgo"}
+              {!selectedAlgorithm && "PESCA"}
             </span>
           </div>
           {/* Right side - buttons and user avatar */}
@@ -667,7 +671,9 @@ export default function SideContent({
             <div className="flex-1 flex flex-col min-w-0 h-full  ">
               {/* Logo */}
               <div className="p-6 border-b border-slate-200">
-                <h1 className="text-2xl font-bold text-slate-900">Ezzalgo</h1>
+                <Link href="/" className=""> 
+                <h1 className="text-2xl font-bold text-slate-900">PESCA</h1>
+                </Link>
               </div>
 
               <div className="flex items-center justify-between px-4 py-3">

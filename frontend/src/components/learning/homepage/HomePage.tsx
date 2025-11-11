@@ -53,7 +53,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Head>
-        <title>EzzAlgo - Learn Algorithms Visually</title>
+        <title>PESCA - Learn Algorithms Visually</title>
         <meta name="description" content="Interactive platform for learning algorithms through visualization and practice" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -288,7 +288,7 @@ export default function HomePage() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-indigo-600 rounded-md"></div>
-              <span className="text-xl font-bold text-white">EzzAlgo</span>
+              <span className="text-xl font-bold text-white">PESCA</span>
             </div>
             <p className="text-sm">Master algorithms through visualization and practice.</p>
           </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-sm">
-          <p>© {new Date().getFullYear()} EzzAlgo. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} PESCA. All rights reserved.</p>
         </div>
       </footer>
     </div>

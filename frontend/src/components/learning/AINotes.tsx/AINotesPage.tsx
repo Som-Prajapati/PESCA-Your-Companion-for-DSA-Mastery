@@ -312,13 +312,29 @@ export default function AINotesPage() {
       timestamp: new Date(),
     };
 
+    // const aiResponse: Message = {
+    //   id: (Date.now() + 1).toString(),
+    //   content:
+    //     "Great choice! I'd be happy to help you create comprehensive notes on that topic. Let me break down the key concepts, provide examples, and organize the information in a way that's easy to understand and remember. What specific aspects would you like to focus on?",
+    //   sender: "ai",
+    //   timestamp: new Date(),
+    // };
+
     const aiResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      content:
-        "Great choice! I'd be happy to help you create comprehensive notes on that topic. Let me break down the key concepts, provide examples, and organize the information in a way that's easy to understand and remember. What specific aspects would you like to focus on?",
-      sender: "ai",
-      timestamp: new Date(),
-    };
+  id: (Date.now() + 1).toString(),
+  content: `1. Main Idea: Bubble Sort is a simple algorithm that repeatedly steps through a list.
+2. Core Action: It compares adjacent pairs of elements and swaps them if they are in the wrong order.
+3. "Bubbling" Effect: After each full pass, the largest unsorted element "bubbles up" to its correct position.
+4. How it Finishes: This process is repeated until the entire list is sorted.
+5. Optimization: It can be optimized to stop early if a full pass is completed with zero swaps.
+6. Time Complexity (Worst/Average): O(n^2)
+7. Time Complexity (Best): O(n) (if the optimized version is used on an already sorted list).
+8. Space Complexity: O(1) (it's an "in-place" sort and uses no significant extra memory).
+9. Pro: It is very simple to understand and implement.
+10. Con: It is extremely inefficient and slow for large datasets.`,
+  sender: "ai",
+  timestamp: new Date(),
+};
 
     if (!hasStartedChat) {
       setHasStartedChat(true);
@@ -1166,7 +1182,7 @@ export default function AINotesPage() {
                         : "text-gray-500"
                     }`}
                   >
-                    using gemini
+                    using pesca
                   </span>
                   <Button
                     onClick={sendMessage}
@@ -1275,6 +1291,7 @@ export default function AINotesPage() {
                             className={`${theme.text} leading-relaxed ${
                               currentTheme === "vintage" ? "font-serif" : ""
                             }`}
+                            style={{ whiteSpace: "pre-line" }}
                           >
                             {msg.content}
                           </p>
@@ -1292,6 +1309,7 @@ export default function AINotesPage() {
                           className={`${theme.text} leading-relaxed ${
                             currentTheme === "vintage" ? "font-serif" : ""
                           }`}
+                          style={{ whiteSpace: "pre-line" }}
                         >
                           {msg.content}
                         </p>
@@ -1355,7 +1373,7 @@ export default function AINotesPage() {
                                 currentTheme === "vintage" ? "font-serif" : ""
                               }`}
                             >
-                              Gemini can make mistakes. Please double-check
+                              Our model can make mistakes. Please double-check
                               responses.
                             </p>
                           )}
@@ -1412,7 +1430,7 @@ export default function AINotesPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Reply to Gemini..."
+                  placeholder="Ask ..."
                   className={`w-full px-6 py-4 ${theme.text} ${
                     isDarkTheme
                       ? "placeholder-gray-400"
@@ -1492,7 +1510,7 @@ export default function AINotesPage() {
                           : "text-gray-500"
                       }`}
                     >
-                      using gemini
+                      using pesca
                     </span>
                     <Button
                       onClick={sendMessage}
@@ -1519,3 +1537,4 @@ export default function AINotesPage() {
     </div>
   );
 }
+
