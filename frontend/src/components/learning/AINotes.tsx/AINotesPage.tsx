@@ -302,70 +302,84 @@ export default function AINotesPage() {
     }
   }, []);
 
-  const sendMessage = useCallback(() => {
-    if (!message.trim()) return;
+  const sendMessage = useCallback(async () => {
+  if (!message.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: message,
-      sender: "user",
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    content: message,
+    sender: "user",
+    timestamp: new Date(),
+  };
+
+  // optimistic UI: show user msg immediately
+  if (!hasStartedChat) {
+    setHasStartedChat(true);
+    if (welcomeRef.current) {
+      gsap.to(welcomeRef.current, {
+        y: -100,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.in",
+      });
+    }
+    setMessages([userMessage]);
+  } else {
+    setMessages((prev) => [...prev, userMessage]);
+  }
+
+  setIsTyping(true);
+  const prompt = message;
+  setMessage("");
+
+  try {
+    // call your server route -> Gemini
+    const res = await fetch("/api/ai/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+
+    let replyText = "I couldn't fetch a response.";
+    if (res.ok) {
+      const data = await res.json();
+      replyText = data?.text || replyText;
+    } else {
+      const err = await res.json().catch(() => ({} as any));
+      replyText = err?.error || replyText;
+    }
+
+    const aiResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      content: replyText,
+      sender: "ai",
       timestamp: new Date(),
     };
 
-    // const aiResponse: Message = {
-    //   id: (Date.now() + 1).toString(),
-    //   content:
-    //     "Great choice! I'd be happy to help you create comprehensive notes on that topic. Let me break down the key concepts, provide examples, and organize the information in a way that's easy to understand and remember. What specific aspects would you like to focus on?",
-    //   sender: "ai",
-    //   timestamp: new Date(),
-    // };
-
-    const aiResponse: Message = {
-  id: (Date.now() + 1).toString(),
-  content: `1. Main Idea: Bubble Sort is a simple algorithm that repeatedly steps through a list.
-2. Core Action: It compares adjacent pairs of elements and swaps them if they are in the wrong order.
-3. "Bubbling" Effect: After each full pass, the largest unsorted element "bubbles up" to its correct position.
-4. How it Finishes: This process is repeated until the entire list is sorted.
-5. Optimization: It can be optimized to stop early if a full pass is completed with zero swaps.
-6. Time Complexity (Worst/Average): O(n^2)
-7. Time Complexity (Best): O(n) (if the optimized version is used on an already sorted list).
-8. Space Complexity: O(1) (it's an "in-place" sort and uses no significant extra memory).
-9. Pro: It is very simple to understand and implement.
-10. Con: It is extremely inefficient and slow for large datasets.`,
-  sender: "ai",
-  timestamp: new Date(),
-};
-
-    if (!hasStartedChat) {
-      setHasStartedChat(true);
-      if (welcomeRef.current) {
-        gsap.to(welcomeRef.current, {
-          y: -100,
-          opacity: 0,
-          duration: 0.6,
-          ease: "power3.in",
-        });
-      }
-      setTimeout(() => {
-        setMessages([userMessage, aiResponse]);
-        if (chatAreaRef.current) {
-          gsap.fromTo(
-            chatAreaRef.current,
-            { y: 50, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
-          );
-        }
-      }, 300);
-    } else {
-      setMessages((prev) => [...prev, userMessage]);
-      setTimeout(() => {
-        setMessages((prev) => [...prev, aiResponse]);
-      }, 800);
+    // animate chat area only on first AI drop-in
+    if (!hasStartedChat && chatAreaRef.current) {
+      gsap.fromTo(
+        chatAreaRef.current,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      );
     }
 
-    setMessage("");
+    setMessages((prev) => [...prev, aiResponse]);
+  } catch (e: any) {
+    const aiResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      content: "Something went wrong talking to the model. Try again.",
+      sender: "ai",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, aiResponse]);
+  } finally {
+    setIsTyping(false);
     setTimeout(scrollToLatestMessage, 400);
-  }, [message, hasStartedChat, scrollToLatestMessage]);
+  }
+}, [message, hasStartedChat, scrollToLatestMessage]);
+
 
   const dsaTopics = [
     { icon: Database, label: "Arrays" },

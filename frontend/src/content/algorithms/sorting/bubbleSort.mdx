@@ -1,0 +1,510 @@
+```mdx
+---
+title: "Bubble Sort Algorithm"
+description: "Complete guide to Bubble Sort - a simple comparison-based sorting algorithm"
+category: "Sorting Algorithms"
+difficulty: "Beginner"
+date: "2024-01-15"
+tags: ["sorting", "algorithms", "beginner", "comparison-sort"]
+---
+
+# Bubble Sort Algorithm
+
+## Overview
+
+Bubble Sort is one of the simplest sorting algorithms that works by repeatedly swapping adjacent elements if they are in the wrong order. This process continues until the entire array is sorted.
+
+### Key Characteristics
+- **Type**: Comparison-based sorting
+- **Approach**: Iterative
+- **Stability**: Stable
+- **In-place**: Yes
+- **Adaptive**: Yes (can be optimized)
+
+## Algorithm Theory
+
+### Basic Idea
+Bubble Sort gets its name because smaller elements "bubble" to the top of the list (beginning of the array) while larger elements sink to the bottom (end of the array), much like bubbles rising in water.
+
+### How It Works
+1. Start from the first element, compare it with the next element
+2. If the first element is greater than the second, swap them
+3. Move to the next pair and repeat
+4. Continue this process for each pair of adjacent elements
+5. Repeat the entire process until no more swaps are needed
+
+### Visual Representation
+
+```mermaid
+graph TD
+    A[Start with Unsorted Array] --> B[Initialize i = 0]
+    B --> C[i < n-1?]
+    C -->|No| D[Array Sorted]
+    C -->|Yes| E[Initialize j = 0]
+    E --> F[j < n-i-1?]
+    F -->|No| G[i++]
+    G --> C
+    F -->|Yes| H[Compare arr[j] and arr[j+1]]
+    H --> I[arr[j] > arr[j+1]?]
+    I -->|Yes| J[Swap arr[j] and arr[j+1]]
+    J --> K[j++]
+    I -->|No| K
+    K --> F
+```
+
+## Step-by-Step Example
+
+### Example: Sorting [5, 2, 8, 1, 9]
+
+#### First Pass
+```
+Initial: [5, 2, 8, 1, 9]
+
+Compare 5 and 2: 5 > 2 → Swap
+[2, 5, 8, 1, 9]
+
+Compare 5 and 8: 5 < 8 → No swap
+[2, 5, 8, 1, 9]
+
+Compare 8 and 1: 8 > 1 → Swap
+[2, 5, 1, 8, 9]
+
+Compare 8 and 9: 8 < 9 → No swap
+[2, 5, 1, 8, 9]
+```
+
+#### Second Pass
+```
+Compare 2 and 5: 2 < 5 → No swap
+[2, 5, 1, 8, 9]
+
+Compare 5 and 1: 5 > 1 → Swap
+[2, 1, 5, 8, 9]
+
+Compare 5 and 8: 5 < 8 → No swap
+[2, 1, 5, 8, 9]
+```
+
+#### Third Pass
+```
+Compare 2 and 1: 2 > 1 → Swap
+[1, 2, 5, 8, 9]
+
+Compare 2 and 5: 2 < 5 → No swap
+[1, 2, 5, 8, 9]
+```
+
+#### Fourth Pass
+```
+No swaps needed - Array is sorted!
+[1, 2, 5, 8, 9]
+```
+
+## Algorithm Pseudocode
+
+### Basic Bubble Sort
+```
+procedure bubbleSort(A: list of sortable items)
+    n = length(A)
+    for i from 0 to n-1 do
+        for j from 0 to n-i-2 do
+            if A[j] > A[j+1] then
+                swap(A[j], A[j+1])
+            end if
+        end for
+    end for
+end procedure
+```
+
+### Optimized Bubble Sort
+```
+procedure optimizedBubbleSort(A: list of sortable items)
+    n = length(A)
+    for i from 0 to n-1 do
+        swapped = false
+        for j from 0 to n-i-2 do
+            if A[j] > A[j+1] then
+                swap(A[j], A[j+1])
+                swapped = true
+            end if
+        end for
+        if not swapped then
+            break
+        end if
+    end for
+end procedure
+```
+
+## Complexity Analysis
+
+### Time Complexity
+
+| Case | Complexity | Description |
+|------|------------|-------------|
+| Best | O(n) | When array is already sorted (optimized version) |
+| Average | O(n²) | Randomly ordered elements |
+| Worst | O(n²) | Array sorted in reverse order |
+
+### Space Complexity
+
+| Type | Complexity | Description |
+|------|------------|-------------|
+| Worst | O(1) | Only constant extra space needed |
+
+### Detailed Analysis
+
+- **Number of comparisons**: (n-1) + (n-2) + ... + 1 = n(n-1)/2 ≈ O(n²)
+- **Number of swaps**: Worst case - O(n²), Best case - O(1)
+- **Auxiliary space**: O(1) for temporary variables
+
+## Code Implementations
+
+### JavaScript
+
+```javascript
+// Basic Bubble Sort
+function bubbleSort(arr) {
+    const n = arr.length;
+    
+    for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap elements
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}
+
+// Optimized Bubble Sort
+function optimizedBubbleSort(arr) {
+    const n = arr.length;
+    
+    for (let i = 0; i < n - 1; i++) {
+        let swapped = false;
+        
+        for (let j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap elements
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                swapped = true;
+            }
+        }
+        
+        // If no swapping occurred, array is sorted
+        if (!swapped) break;
+    }
+    return arr;
+}
+
+// Example usage
+const numbers = [64, 34, 25, 12, 22, 11, 90];
+console.log("Original:", numbers);
+console.log("Sorted:", bubbleSort([...numbers]));
+```
+
+### Python
+
+```python
+def bubble_sort(arr):
+    """
+    Basic Bubble Sort Implementation
+    """
+    n = len(arr)
+    
+    for i in range(n - 1):
+        for j in range(n - i - 1):
+            if arr[j] > arr[j + 1]:
+                # Swap elements
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+def optimized_bubble_sort(arr):
+    """
+    Optimized Bubble Sort with early termination
+    """
+    n = len(arr)
+    
+    for i in range(n - 1):
+        swapped = False
+        
+        for j in range(n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        
+        # If no swaps, array is sorted
+        if not swapped:
+            break
+    return arr
+
+# Example usage
+if __name__ == "__main__":
+    numbers = [64, 34, 25, 12, 22, 11, 90]
+    print("Original:", numbers)
+    print("Sorted:", bubble_sort(numbers.copy()))
+```
+
+### Java
+
+```java
+public class BubbleSort {
+    
+    // Basic Bubble Sort
+    public static void bubbleSort(int[] arr) {
+        int n = arr.length;
+        
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    // Swap elements
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+    }
+    
+    // Optimized Bubble Sort
+    public static void optimizedBubbleSort(int[] arr) {
+        int n = arr.length;
+        boolean swapped;
+        
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    // Swap elements
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+            
+            // If no swapping, array is sorted
+            if (!swapped) break;
+        }
+    }
+    
+    // Example usage
+    public static void main(String[] args) {
+        int[] numbers = {64, 34, 25, 12, 22, 11, 90};
+        
+        System.out.print("Original: ");
+        for (int num : numbers) System.out.print(num + " ");
+        
+        optimizedBubbleSort(numbers);
+        
+        System.out.print("\nSorted: ");
+        for (int num : numbers) System.out.print(num + " ");
+    }
+}
+```
+
+### C++
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Basic Bubble Sort
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap elements
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+    }
+}
+
+// Optimized Bubble Sort
+void optimizedBubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    bool swapped;
+    
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        
+        // If no swapping, array is sorted
+        if (!swapped) break;
+    }
+}
+
+// Example usage
+int main() {
+    vector<int> numbers = {64, 34, 25, 12, 22, 11, 90};
+    
+    cout << "Original: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    optimizedBubbleSort(numbers);
+    
+    cout << "Sorted: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    return 0;
+}
+```
+
+## Visual Demonstration
+
+### Animation Description
+Imagine each pass through the array as bubbles rising:
+- Larger elements sink to the right
+- Smaller elements bubble up to the left
+- With each pass, the largest unsorted element finds its correct position
+
+### Step-by-Step Visualization
+```
+Pass 1: [5, 2, 8, 1, 9] → [2, 5, 1, 8, 9] → [2, 1, 5, 8, 9]
+Pass 2: [2, 1, 5, 8, 9] → [1, 2, 5, 8, 9]
+Pass 3: [1, 2, 5, 8, 9] (no changes)
+```
+
+## Advantages and Disadvantages
+
+### Advantages
+- **Simple to understand and implement**
+- **Stable sorting algorithm** (maintains relative order)
+- **In-place algorithm** (requires O(1) extra space)
+- **Adaptive** (efficient for partially sorted arrays when optimized)
+
+### Disadvantages
+- **Very slow for large datasets** (O(n²) time complexity)
+- **Inefficient compared to other O(n log n) algorithms**
+- **Not suitable for real-world large-scale applications**
+
+## Real-World Applications
+
+Despite its inefficiency, Bubble Sort is used in:
+
+1. **Educational purposes** - Teaching sorting concepts
+2. **Small datasets** - When n is very small (< 10 elements)
+3. **Nearly sorted data** - With optimization, can be efficient
+4. **Memory-constrained systems** - Due to O(1) space complexity
+
+## Optimizations
+
+### 1. Early Termination
+Stop if no swaps occur in a pass (already sorted)
+
+### 2. Reduced Range
+Decrease the range of comparison in each pass
+
+### 3. Cocktail Shaker Sort
+Bidirectional bubble sort (sorts in both directions)
+
+```javascript
+// Cocktail Shaker Sort implementation
+function cocktailShakerSort(arr) {
+    let start = 0;
+    let end = arr.length - 1;
+    let swapped = true;
+    
+    while (swapped) {
+        swapped = false;
+        
+        // Left to right
+        for (let i = start; i < end; i++) {
+            if (arr[i] > arr[i + 1]) {
+                [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+                swapped = true;
+            }
+        }
+        
+        if (!swapped) break;
+        
+        end--;
+        swapped = false;
+        
+        // Right to left
+        for (let i = end - 1; i >= start; i--) {
+            if (arr[i] > arr[i + 1]) {
+                [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+                swapped = true;
+            }
+        }
+        
+        start++;
+    }
+    return arr;
+}
+```
+
+## Practice Problems
+
+### Easy
+1. **Implement basic bubble sort**
+2. **Count number of swaps in bubble sort**
+3. **Sort an array of strings using bubble sort**
+
+### Medium
+1. **Implement optimized bubble sort with early termination**
+2. **Visualize bubble sort step by step**
+3. **Compare performance with other sorting algorithms**
+
+### Advanced
+1. **Implement bidirectional bubble sort (Cocktail Shaker)**
+2. **Analyze time complexity for different input patterns**
+3. **Optimize bubble sort for specific data distributions**
+
+## Common Interview Questions
+
+1. **When would you use bubble sort in practice?**
+2. **How can you optimize bubble sort?**
+3. **What is the best-case scenario for bubble sort?**
+4. **Compare bubble sort with insertion sort**
+5. **Is bubble sort stable? Explain why.**
+
+## Key Takeaways
+
+- Bubble Sort is primarily educational, not practical for large data
+- Time complexity: O(n²) average and worst case, O(n) best case (optimized)
+- Space complexity: O(1) - excellent for memory-constrained environments
+- Simple to implement but inefficient for large datasets
+- Useful for understanding basic sorting concepts
+
+## Further Reading
+
+- [Insertion Sort](../insertion-sort) - Another simple O(n²) algorithm
+- [Selection Sort](../selection-sort) - Comparison-based sorting
+- [Merge Sort](../merge-sort) - Efficient O(n log n) algorithm
+- [Quick Sort](../quick-sort) - Another efficient sorting method
+
+---
+
+*Note: While Bubble Sort is easy to understand, in practice you should prefer more efficient algorithms like Quick Sort, Merge Sort, or built-in sorting functions for larger datasets.*
+```
+
+Copy and paste this entire content into your `bubbleSort.mdx` file. This is a complete, self-contained MDX file that includes:
+
+- **Frontmatter** with metadata
+- **Complete theory** and explanations
+- **Visual diagrams** using Mermaid
+- **Step-by-step examples**
+- **Multiple code implementations** in 4 languages
+- **Complexity analysis** with tables
+- **Optimization techniques**
+- **Practice problems**
+- **Interview questions**
+- **Real-world applications**
+
+The file is ready to use and will render beautifully in your Next.js application with proper syntax highlighting and formatting!
