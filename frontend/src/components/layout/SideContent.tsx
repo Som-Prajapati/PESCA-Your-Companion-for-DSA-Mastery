@@ -1,0 +1,806 @@
+"use client";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { signOut, useSession } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Search,
+  ChevronRight,
+  ChevronDown,
+  User,
+  X,
+  GripHorizontal,
+  Menu,
+  Link as LinkIcon,
+  BotMessageSquare,
+} from "lucide-react";
+import { BarChart3, Binary, GitBranch, List } from "lucide-react";
+// Import Link from Next.js for navigation
+import Link from "next/link";
+// At the top of your component or in a separate fonts file
+import { Abril_Fatface } from "next/font/google";
+
+
+const michroma = Abril_Fatface({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  children?: MenuItem[];
+}
+
+interface SidebarProps {
+  isOpen: boolean;
+  width: number;
+  onWidthChange: (width: number) => void;
+  onToggle: () => void;
+  selectedAlgorithm?:
+    | "bubble"
+    | "selection"
+    | "insertion"
+    | "heap"
+    | "jump"
+    | "linear"
+    | "binary"
+    | "count"
+    | "interpolation"
+    | "radix"
+    |"count";
+  onAlgorithmChange?: (
+    algorithm:
+      | "bubble"
+      | "selection"
+      | "insertion"
+      | "heap"
+      | "jump"
+      | "linear"
+      | "binary"
+      | "count"
+      | "interpolation"
+      | "radix"
+      |"count"
+  ) => void;
+}
+
+const menuItems: MenuItem[] = [
+  {
+    id: "quick-start",
+    label: "Quick Start",
+    icon: <List className="w-4 h-4 text-blue-500" />,
+  },
+  {
+    id: "sorting-algorithms",
+    label: "Sorting Algorithms",
+    icon: <BarChart3 className="w-4 h-4 text-green-500" />,
+    children: [
+      // O(n²) - Simple algorithms
+      { id: "bubble-sort", label: "Bubble Sort" },
+      { id: "selection-sort", label: "Selection Sort" },
+      { id: "insertion-sort", label: "Insertion Sort" },
+      // O(n log n) - Efficient algorithms
+      { id: "heap-sort", label: "Heap Sort" },
+      // O(n + k) - Non-comparison based
+      { id: "count-sort", label: "Count Sort" },
+      { id: "radix-sort", label: "Radix Sort" },
+    ],  
+  },
+  {
+    id: "searching-algorithms",
+    label: "Searching Algorithms",
+    icon: <Search className="w-4 h-4 text-pink-500" />,
+    children: [
+      // O(n) - Linear time
+      { id: "linear-search", label: "Linear Search" },
+      // O(√n) - Square root time
+      { id: "jump-search", label: "Jump Search" },
+      // O(log n) - Logarithmic time
+      { id: "binary-search", label: "Binary Search" },
+      { id: "interpolation-search", label: "Interpolation Search" },
+    ],
+  },
+  {
+    id: "graph",
+    label: "Graph Algorithms",
+    icon: <GitBranch className="w-4 h-4 text-orange-500" />,
+    children: [
+      // O(V + E) - Linear in vertices and edges
+      { id: "bfs", label: "BFS" },
+      { id: "dfs", label: "DFS" },
+      // O(E log V) - Minimum spanning tree
+      { id: "prims", label: "Prims" },
+      { id: "kruskals", label: "Kruskals" },
+      // O((V + E) log V) - Shortest path
+      { id: "dijkstra", label: "Dijkstra" },
+      // O(V³) - All pairs shortest path
+      { id: "warshalls", label: "Floyd-Warshall" },
+    ],
+  },
+  {
+    id: "data-structures",
+    label: "Data Structures",
+    icon: <Binary className="w-4 h-4 text-purple-500" />,
+  },
+  {
+    id: "trees",
+    label: "Trees",
+    icon: <GitBranch className="w-4 h-4 text-orange-500" />,
+    // children: [{ id: "binary-tree", label: "Binary Tree" }],
+  },
+];
+
+export default function SideContent({
+  isOpen,
+  width,
+  onWidthChange,
+  onToggle,
+  selectedAlgorithm,
+  onAlgorithmChange,
+}: SidebarProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragStartWidth, setDragStartWidth] = useState(0);
+  const [activeTab, setActiveTab] = useState("docs");
+  const [expandedItem, setExpandedItem] = useState<string | null>("sorting-algorithms");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const { data: session } = useSession();
+
+  // Filter menu items based on search
+  const filteredMenuItems = useMemo(() => {
+    if (!searchQuery) return menuItems;
+    const filterItems = (items: MenuItem[]): MenuItem[] => {
+      return items
+        .map((item) => {
+          const matchesSearch = item.label
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+          const filteredChildren = item.children
+            ? filterItems(item.children)
+            : [];
+          if (matchesSearch || filteredChildren.length > 0) {
+            return {
+              ...item,
+              children:
+                filteredChildren.length > 0 ? filteredChildren : item.children,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as MenuItem[];
+    };
+    return filterItems(menuItems);
+  }, [searchQuery]);
+
+  // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event : any) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setShowDropdown(false)
+        }
+      }
+  
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+    
+  // Auto-expand dropdown when searching for algorithms
+  useEffect(() => {
+    if (searchQuery) {
+      // Find which parent dropdown contains the search result
+      const findParentWithMatchingChild = (items: MenuItem[]): string | null => {
+        for (const item of items) {
+          if (item.children) {
+            const hasMatchingChild = item.children.some(child =>
+              child.label.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            if (hasMatchingChild) {
+              return item.id;
+            }
+          }
+        }
+        return null;
+      };
+      
+      const parentToExpand = findParentWithMatchingChild(menuItems);
+      if (parentToExpand) {
+        setExpandedItem(parentToExpand);
+      }
+    }
+  }, [searchQuery]);
+
+  const toggleExpanded = (itemId: string) => {
+    setExpandedItem(prev => {
+      // If clicking on the currently expanded item, collapse it
+      if (prev === itemId) {
+        return null;
+      }
+      // Otherwise, expand the clicked item (and collapse any other)
+      return itemId;
+    });
+  };
+
+  // Sidebar drag handlers
+  const handleSidebarMouseDown = (e: React.MouseEvent) => {
+    if (!isOpen) return;
+
+    setIsDragging(true);
+    setDragStartX(e.clientX);
+    setDragStartWidth(width);
+    e.preventDefault();
+  };
+
+  const handleKeyDown = (event : any) => {
+    if (event.key === 'Escape') {
+      setShowDropdown(false)
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      setShowDropdown(!showDropdown)
+    }
+  }
+
+  const handleLogout = (e: any) => {
+    e.preventDefault();
+    setShowDropdown(false);
+    signOut();
+  };
+
+  const handleSidebarMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - dragStartX;
+    const newWidth = dragStartWidth + deltaX;
+
+    // If dragging left significantly, close the sidebar
+    if (newWidth < 150) {
+      onToggle();
+      onWidthChange(0);
+    } else {
+      // Otherwise, resize normally
+      const constrainedWidth = Math.max(260, Math.min(300, newWidth));
+      onWidthChange(constrainedWidth);
+    }
+  };
+
+  const handleSidebarMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleClosedSidebarClick = () => {
+    if (!isOpen) {
+      onToggle();
+      onWidthChange(260);
+    }
+  };
+
+  // Add global mouse event listeners for sidebar dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleSidebarMouseMove);
+      document.addEventListener("mouseup", handleSidebarMouseUp);
+      document.body.style.cursor = "ew-resize";
+      document.body.style.userSelect = "none";
+    } else {
+      document.removeEventListener("mousemove", handleSidebarMouseMove);
+      document.removeEventListener("mouseup", handleSidebarMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    return () => {
+      document.removeEventListener("mousemove", handleSidebarMouseMove);
+      document.removeEventListener("mouseup", handleSidebarMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging, dragStartX, dragStartWidth]);
+
+  const renderMenuItem = (item: MenuItem, level = 0) => {
+    const isExpanded = expandedItem === item.id;
+    const hasChildren = item.children && item.children.length > 0;
+
+    // Check if this is a sorting algorithm item
+    const isAlgorithmItem = [
+      "bubble-sort",
+      "selection-sort",
+      "insertion-sort",
+      "heap-sort",
+      "jump-search",
+      "radix-sort",
+      "linear-search",
+      "interpolation-search",
+      "binary-search",
+      "count-sort",
+      "bfs",
+      "dfs",
+      ""
+    ].includes(item.id);
+    const isSelected =
+      (isAlgorithmItem &&
+        ((item.id === "bubble-sort" && selectedAlgorithm === "bubble") ||
+          (item.id === "selection-sort" && selectedAlgorithm === "selection") ||
+          (item.id === "insertion-sort" && selectedAlgorithm === "insertion") ||
+          (item.id === "heap-sort" && selectedAlgorithm === "heap") ||
+          (item.id === "jump-search" && selectedAlgorithm === "jump") ||
+          (item.id === "radix-sort" && selectedAlgorithm === "radix") ||
+          (item.id === "linear-search" && selectedAlgorithm === "linear") ||
+          (item.id === "interpolation-search" && selectedAlgorithm === "interpolation") ||
+          (item.id === "binary-search" && selectedAlgorithm === "binary") ||
+          (item.id === "count-sort" && selectedAlgorithm === "count")));
+
+    const handleItemClick = () => {
+      if (hasChildren) {
+        toggleExpanded(item.id);
+      } else if (isAlgorithmItem && onAlgorithmChange) {
+        // Map the menu item IDs to algorithm names
+        const algorithmMap: Record<
+          string,
+          | "bubble"
+          | "selection"
+          | "insertion"
+          | "heap"
+          | "jump"
+          | "linear"
+          | "binary"
+          | "count"
+          | "interpolation"
+          | "radix"
+          |"count"
+        > = {
+          "bubble-sort": "bubble",
+          "selection-sort": "selection",
+          "insertion-sort": "insertion",
+          "heap-sort": "heap",
+          "jump-search": "jump",
+          "radix-sort": "radix",
+          "interpolation-search": "interpolation",
+          "linear-search": "linear",
+          "binary-search": "binary",
+          "count-sort": "count",
+        };
+        const algorithm = algorithmMap[item.id];
+        if (algorithm) {
+          onAlgorithmChange(algorithm);
+        }
+      }
+    };
+
+    // This code defines the rendering of a single menu item (and its children, if any) in a sidebar navigation menu.
+    // It visually represents each item, handles selection highlighting, expansion/collapse for items with children,
+    // and triggers the appropriate click handler for navigation or expansion.
+
+    // The menu item is indented based on its nesting level, shows an icon if present, and displays a chevron
+    // for expandable items. If the item is selected, it is highlighted. If the item has children and is expanded,
+    // it recursively renders its children.
+
+    return (
+      <div key={item.id} className="select-none" >
+        <div
+          className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer group  \ ${
+            isSelected ? "bg-blue-100 text-blue-700" : "hover:bg-slate-100"
+            
+          }`}
+          style={{ paddingLeft: `${8 + level * 16}px` }}
+          onClick={handleItemClick}
+        >
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {hasChildren && (
+              <div className="flex-shrink-0">
+                {isExpanded ? (
+                  <ChevronDown className="w-3 h-3 text-slate-500" />
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-slate-500" />
+                )}
+              </div>
+            )}
+            {!hasChildren && <div className="w-3" />}
+            {item.icon && <div className="flex-shrink-0">{item.icon}</div>}
+            <span
+              className={`text-sm truncate ${
+                isSelected ? "text-blue-700 font-medium" : "text-slate-700"
+              }`}
+            >
+              {item.label}
+            </span>
+          </div>
+        </div>
+        {hasChildren && isExpanded && (
+          <div>
+            {item.children!.map((child) => renderMenuItem(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full" >
+      {/* Navbar - always present */}
+      <div className="absolute inset-0 z-0" style={{ position: "fixed" }}>
+        {isOpen ? (
+        <header className="h-16 flex items-center justify-between px-8 relative z-10 " >
+
+
+          <div className="flex items-center gap-4 " >
+            {/* Sidebar toggle button */}
+          </div>
+          {/* Center - Dynamic Algorithm title */}
+          <div
+            className="absolute flex items-center gap-4"
+            style={{
+              left: `calc(50% + ${width / 2}px)`,
+              transform: "translateX(-50%)"
+            }}
+          >
+            <span
+              className={`text-xl font-extrabold text-gray-900 ${michroma.className}`}
+            >
+              {selectedAlgorithm === "selection" && "Selection Sort"}
+              {selectedAlgorithm === "bubble" && "Bubble Sort"}
+              {selectedAlgorithm === "insertion" && "Insertion Sort"}
+              {selectedAlgorithm === "heap" && "Heap Sort"}
+              {selectedAlgorithm === "jump" && "Jump Search"}
+              {selectedAlgorithm === "radix" && "Radix Sort"}
+              {selectedAlgorithm === "linear" && "Linear Search"}
+              {selectedAlgorithm === "interpolation" && "Interpolation Search"}
+              {selectedAlgorithm === "binary" && "Binary Search"}
+              {selectedAlgorithm === "count" && "Count Sort"}
+              {/* Default title if no algorithm is selected */}
+              {!selectedAlgorithm && "PESCA"}
+            </span>
+          </div>
+          {/* Right side - buttons and user avatar */}
+          <div className="flex items-center gap-4">
+            <button className="relative inline-flex h-9 w-28 rounded-lg overflow-hidden p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+              <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8B5CF6_0%,#F59E0B_50%,#EF4444_75%,#8B5CF6_100%)]" />
+              <span className="inline-flex h-full w-full cursor-pointer rounded-lg items-center justify-center bg-white px-3 py-1 text-sm font-medium text-black backdrop-blur-3xl hover:bg-zinc-100">
+                Beast Mode
+              </span>
+            </button>
+            <div className="underline flex justify-end items-center gap-1">
+              <span className="font-semibold text-gray-900">{session?.user?.name || 'User'}</span>
+              {/* <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div> */}
+              <div className='relative' ref={dropdownRef}>
+          {session ? (
+            <>
+              <button
+                className='text-gray-700 hover:opacity-80 rounded-full font-medium p-1 w-10 h-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all'
+                onClick={() => setShowDropdown(!showDropdown)}
+                onKeyDown={handleKeyDown}
+                aria-expanded={showDropdown}
+                aria-haspopup="true"
+                aria-label={`User menu for ${session?.user?.name || 'User'}`}
+              >
+                {session?.user?.image ? (
+                  <img 
+                    className='w-full rounded-full h-full object-cover'
+                    src={session?.user?.image} 
+                    alt={`${session?.user?.name || 'User'} profile picture`}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full rounded-full bg-gray-500 flex items-center justify-center text-white font-bold text-sm ${session?.user?.image ? 'hidden' : ''}`}>
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              </button>
+              
+              <div 
+                className={`z-10 ${showDropdown ? "block" : "hidden"} absolute top-14 right-0 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600 border border-gray-200 dark:border-gray-600`}
+                role="menu"
+                aria-orientation="vertical"
+              >
+                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" role="none">
+                  <li role="none">
+                    <Link 
+                      href="/mysettings" 
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600"
+                      role="menuitem"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      {session?.user?.name || 'User Settings'}
+                    </Link>
+                  </li>
+                </ul>
+                <div className="py-2" role="none">
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600"
+                    role="menuitem"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex space-x-4">
+              {/* <Link 
+                href="/login" 
+                className="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+              >
+                Sign In
+              </Link> */}
+              <Link 
+                href="/login" 
+                className="px-4 py-2 ml-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+            </div>
+          </div>
+        </header>):(
+        <header className="h-16 flex items-center justify-between px-8 relative z-10" >
+          <div className="flex items-center gap-4 " >
+            {/* Sidebar toggle button */}
+          </div>
+          {/* Center - Dynamic Algorithm title */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4" style={{ position: "fixed" }}>
+            <span
+              className={`text-xl font-extrabold text-gray-900 ${michroma.className}`}
+            >
+              {selectedAlgorithm === "selection" && "Selection Sort"}
+              {selectedAlgorithm === "bubble" && "Bubble Sort"}
+              {selectedAlgorithm === "insertion" && "Insertion Sort"}
+              {selectedAlgorithm === "heap" && "Heap Sort"}
+              {selectedAlgorithm === "jump" && "Jump Search"}
+              {selectedAlgorithm === "radix" && "Radix Sort"}
+              {selectedAlgorithm === "linear" && "Linear Search"}
+              {selectedAlgorithm === "interpolation" && "Interpolation Search"}
+              {selectedAlgorithm === "binary" && "Binary Search"}
+              {selectedAlgorithm ==="count"&&"Count Sort"}
+              {/* Default title if no algorithm is selected */}
+              {!selectedAlgorithm ||
+                (selectedAlgorithm === "bubble" && "Bubble Sort")}
+              {!selectedAlgorithm && "PESCA"}
+            </span>
+          </div>
+          {/* Right side - buttons and user avatar */}
+          <div className="flex items-center gap-4">
+            <button className="relative inline-flex h-9 w-28 rounded-lg overflow-hidden p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+              <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8B5CF6_0%,#F59E0B_50%,#EF4444_75%,#8B5CF6_100%)]" />
+              <span className="inline-flex h-full w-full cursor-pointer rounded-lg items-center justify-center bg-white px-3 py-1 text-sm font-medium text-black backdrop-blur-3xl hover:bg-zinc-100">
+                Beast Mode
+              </span>
+            </button>
+            <div className="underline flex justify-end items-center gap-1">
+              <span className="font-semibold text-gray-900">{session?.user?.name || 'User'}</span>
+              {/* <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div> */}
+              <div className='relative' ref={dropdownRef}>
+          {session ? (
+            <>
+              <button
+                className='text-gray-700 hover:opacity-80 rounded-full font-medium p-1 w-10 h-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all'
+                onClick={() => setShowDropdown(!showDropdown)}
+                onKeyDown={handleKeyDown}
+                aria-expanded={showDropdown}
+                aria-haspopup="true"
+                aria-label={`User menu for ${session?.user?.name || 'User'}`}
+              >
+                {session?.user?.image ? (
+                  <img 
+                    className='w-full rounded-full h-full object-cover'
+                    src={session?.user?.image} 
+                    alt={`${session?.user?.name || 'User'} profile picture`}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full rounded-full bg-gray-500 flex items-center justify-center text-white font-bold text-sm ${session?.user?.image ? 'hidden' : ''}`}>
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              </button>
+              
+              <div 
+                className={`z-10 ${showDropdown ? "block" : "hidden"} absolute top-14 right-0 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600 border border-gray-200 dark:border-gray-600`}
+                role="menu"
+                aria-orientation="vertical"
+              >
+                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" role="none">
+                  <li role="none">
+                    <Link 
+                      href="/mysettings" 
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600"
+                      role="menuitem"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      {session?.user?.name || 'User Settings'}
+                    </Link>
+                  </li>
+                </ul>
+                <div className="py-2" role="none">
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600"
+                    role="menuitem"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex space-x-4">
+              {/* <Link 
+                href="/login" 
+                className="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+              >
+                Sign In
+              </Link> */}
+              <Link 
+                href="/login" 
+                className="px-4 py-2 ml-2 text-sm font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+            </div>
+          </div>
+        </header>)}
+      </div>
+
+      {/* Content area with sidebar */}
+      <div className="flex flex-1 h-full z-1">
+        {/* Sidebar */}
+        {isOpen ? (
+          <div
+            className="flex h-full bg-white border-r border-slate-200"
+            style={{ width: `${width}px`, minWidth: 0, overflow: "hidden" }}
+          >
+            <div className="flex-1 flex flex-col min-w-0 h-full  ">
+              {/* Logo */}
+              <div className="p-6 border-b border-slate-200">
+                <Link href="/" className=""> 
+                <h1 className="text-2xl font-bold text-slate-900">PESCA</h1>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between px-4 py-3">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  <div className="w-full flex justify-center mt-2 mb-0">
+                    <TabsList
+                      className="grid grid-cols-2"
+                      style={{ width: `${width - 65}px`, minWidth: 0, transition: "width 0.2s" }} // 32px for mx-4 padding
+                    >
+                      <TabsTrigger value="docs" className="text-xs">
+                        Docs
+                      </TabsTrigger>
+                      <TabsTrigger value="profile" className="text-xs">
+                        Profile
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  <TabsContent
+                    value="docs"
+                    className="flex-1 flex flex-col min-h-0 mt-3"
+                  >
+                    <div className="px-4 mb-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search documentation..."
+                          className="pl-10 h-8 text-sm"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex-1 px-2 custom-scrollbar"
+                      style={{
+                        overflowY: expandedItem ? "auto" : "hidden",
+                        maxHeight: "calc(100vh - 220px)", // adjust as needed for your layout
+                      }}
+                    >
+                      <div className="space-y-0.5 ">
+                        {filteredMenuItems.map((item) => renderMenuItem(item))}
+                      </div>
+                    </div>
+                    <style jsx global>{`
+                      .custom-scrollbar {
+                        scrollbar-width: thin;
+                        scrollbar-color: #a0aec0 #f1f5f9;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar {
+                        width: 8px;
+                        background: #f1f5f9;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: #a0aec0;
+                        border-radius: 4px;
+                      }
+                      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background: #718096;
+                      }
+                    `}</style>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="profile"
+                    className="flex-1 flex flex-col min-h-0 mt-3"
+                  >
+                    <div className="px-4 overflow-y-auto">
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-slate-900">
+                            User Profile
+                          </div>
+                          <div className="text-xs text-slate-500 truncate">
+                            user@example.com
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+
+            <div
+              className="w-1 bg-slate-200 hover:bg-slate-300 cursor-ew-resize flex-shrink-0 relative group"
+              onMouseDown={handleSidebarMouseDown}
+            >
+              <div className="absolute inset-y-0 -left-1 -right-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <GripHorizontal className="w-3 h-3 text-slate-400 rotate-90" />
+              </div>
+            </div>
+          </div>
+        
+       
+        ) 
+        : (
+          <div
+            className="w-3 bg-gray-300 hover:bg-blue-500 cursor-pointer transition-all duration-300 flex items-center justify-center group"
+            onClick={handleClosedSidebarClick}
+          >
+            <div className="w-1 h-8 bg-gray-900 group-hover:bg-white rounded-full transition-colors"></div>
+          </div>
+        )}
+      </div>
+
+      {/* Fixed AI Button - Now properly using Next.js Link */}
+      <div className="fixed right-[-3] top-1/2 transform -translate-y-1/2 z-40">
+        <Link href="/notes/bubble" passHref>
+          <button className="relative inline-flex h-28 w-8 rounded-sm overflow-hidden p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 transition-transform hover:scale-105">
+            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8B5CF6_0%,#F59E0B_50%,#EF4444_75%,#8B5CF6_100%)]" />
+            <span className="inline-flex h-full w-full cursor-pointer items-center justify-center bg-zinc-900 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl hover:bg-zinc-800 transition-colors">
+              <span className=" whitespace-nowrap">
+                <BotMessageSquare />
+              </span>
+            </span>
+          </button>
+        </Link>
+      </div>
+    </div>
+  );
+}
