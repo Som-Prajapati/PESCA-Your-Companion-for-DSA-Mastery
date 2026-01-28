@@ -1287,7 +1287,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
               }}
             >
               <Image
-                src="/Images/SearchImage.png"
+                src="/Images/Search.png"
                 alt="search indicator"
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}

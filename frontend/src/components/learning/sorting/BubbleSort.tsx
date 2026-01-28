@@ -900,10 +900,6 @@
 
 // export default BubbleSort;
 
-
-
-
-
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
@@ -964,7 +960,8 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
   const [isAscending, setIsAscending] = useState<boolean>(true);
   const [speed, setSpeed] = useState<number>(1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [stepDescription, setStepDescription] = useState<string>("Initial state"); // Added step description state
+  const [stepDescription, setStepDescription] =
+    useState<string>("Initial state"); // Added step description state
 
   // Refs for DOM elements
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1016,7 +1013,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
     element: HTMLElement,
     toX: number | string,
     toY: number | string = 0,
-    duration: number = 0.5
+    duration: number = 0.5,
   ): gsap.core.Tween => {
     return gsap.to(element, {
       x: toX,
@@ -1029,7 +1026,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
   const scaleSwap = (
     elementB: HTMLElement,
     elementA: HTMLElement,
-    duration: number = 1.2
+    duration: number = 1.2,
   ): gsap.core.Timeline => {
     const timeline = gsap.timeline();
     const indexA = arrayElementsRef.current.findIndex((el) => el === elementA);
@@ -1066,7 +1063,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.out",
           },
-          0
+          0,
         )
         .to(
           elementA,
@@ -1076,7 +1073,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.in",
           },
-          duration / 2
+          duration / 2,
         );
 
       // Element B (right) scales down, moves left to midpoint, then scales back to normal when reaching final position
@@ -1089,7 +1086,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.out",
           },
-          0
+          0,
         )
         .to(
           elementB,
@@ -1099,7 +1096,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.in",
           },
-          duration / 2
+          duration / 2,
         );
 
       swapAnimation.call(() => {
@@ -1121,7 +1118,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
   // Sorted indicator animation
   const animateSortedIndicator = (
-    indices: number | number[]
+    indices: number | number[],
   ): gsap.core.Timeline => {
     const targetIndices = Array.isArray(indices) ? indices : [indices];
     const elements = targetIndices
@@ -1141,7 +1138,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
           duration: 0.5,
           ease: "power2.out",
         },
-        0
+        0,
       );
     });
 
@@ -1152,7 +1149,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
   const highlightBoxes = (
     indices: number | number[],
     intensity: "low" | "high" = "low",
-    duration: number = 0.6
+    duration: number = 0.6,
   ): gsap.core.Timeline => {
     const targetIndices = Array.isArray(indices) ? indices : [indices];
     const elements = targetIndices
@@ -1179,7 +1176,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.out",
           },
-          0
+          0,
         )
         .to(
           element,
@@ -1188,7 +1185,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             duration: duration / 2,
             ease: "power2.in",
           },
-          duration / 2
+          duration / 2,
         );
     });
 
@@ -1238,8 +1235,8 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               opacity: 1,
               duration: 0.5,
               ease: "power1.out",
-            }
-          )
+            },
+          ),
         );
         mainTimeline.add(
           gsap.fromTo(
@@ -1255,9 +1252,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               opacity: 1,
               duration: 0.5,
               ease: "power1.out",
-            }
+            },
           ),
-          "-=0.5"
+          "-=0.5",
         );
       }
     }
@@ -1280,18 +1277,18 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               jArrowRef.current,
               TOTAL_BOX_SPACING + ARROW_X_OFFSET2,
               `+=0`,
-              0.3
+              0.3,
             ),
-            "+=0.2"
+            "+=0.2",
           );
           mainTimeline.add(
             slideElementTo(iArrowRef.current, ARROW_X_OFFSET, `+=0`, 0.3),
-            "-=0.3"
+            "-=0.3",
           );
           if (bubbleRef.current) {
             mainTimeline.add(
               gsap.to(bubbleRef.current, { x: 0, y: 0, duration: 0.2 }),
-              "-=0.2"
+              "-=0.2",
             );
           }
         }
@@ -1318,9 +1315,13 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             currentStepRef.current = thisStep;
             setCurrentPseudoCodeLine(4); // Highlight "if array[j] > array[j + 1] then"
             //the currentJValue should be the value in the DOM element of the array
-            const currentJValue = arrayElementsRef.current[j]?.textContent || arr[j];
-            const currentJPlusOneValue = arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
-            setStepDescription(`Comparing elements ${currentJValue} and ${currentJPlusOneValue}`);
+            const currentJValue =
+              arrayElementsRef.current[j]?.textContent || arr[j];
+            const currentJPlusOneValue =
+              arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
+            setStepDescription(
+              `Comparing elements ${currentJValue} and ${currentJPlusOneValue}`,
+            );
           });
         }
 
@@ -1351,27 +1352,35 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             if (leftElement && rightElement) {
               mainTimeline.add(
                 scaleSwap(leftElement, rightElement, 0.8),
-                "+=0.2"
+                "+=0.2",
               );
             }
             mainTimeline.add(gsap.to({}, { duration: 0.5 }));
             const tempRef = arrayElementsRef.current[j];
             arrayElementsRef.current[j] = arrayElementsRef.current[j + 1];
             arrayElementsRef.current[j + 1] = tempRef;
-            
+
             // Update description after swap
             mainTimeline.call(() => {
-              const currentJValue = arrayElementsRef.current[j]?.textContent || arr[j];
-              const currentJPlusOneValue = arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
-              setStepDescription(`Swapped elements ${currentJPlusOneValue} and ${currentJValue} exchanged`);
+              const currentJValue =
+                arrayElementsRef.current[j]?.textContent || arr[j];
+              const currentJPlusOneValue =
+                arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
+              setStepDescription(
+                `Swapped elements ${currentJPlusOneValue} and ${currentJValue} exchanged`,
+              );
             });
           }
         } else {
           // Update description when no swap occurs
           mainTimeline.call(() => {
-            const currentJValue = arrayElementsRef.current[j]?.textContent || arr[j];
-            const currentJPlusOneValue = arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
-            setStepDescription(`No swap needed: ${currentJValue} and ${currentJPlusOneValue} are in correct order`);
+            const currentJValue =
+              arrayElementsRef.current[j]?.textContent || arr[j];
+            const currentJPlusOneValue =
+              arrayElementsRef.current[j + 1]?.textContent || arr[j + 1];
+            setStepDescription(
+              `No swap needed: ${currentJValue} and ${currentJPlusOneValue} are in correct order`,
+            );
           });
         }
 
@@ -1382,9 +1391,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               iArrowRef.current,
               `+=${TOTAL_BOX_SPACING}`,
               `+=0`,
-              0.3
+              0.3,
             ),
-            "+=0.5"
+            "+=0.5",
           );
 
           mainTimeline.add(
@@ -1392,9 +1401,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               jArrowRef.current,
               `+=${TOTAL_BOX_SPACING}`,
               `+=0`,
-              0.3
+              0.3,
             ),
-            "-=0.3"
+            "-=0.3",
           );
 
           if (bubbleRef.current) {
@@ -1403,9 +1412,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
                 bubbleRef.current,
                 `+=${TOTAL_BOX_SPACING}`,
                 0,
-                0.3
+                0.3,
               ),
-              "-=0.3"
+              "-=0.3",
             );
           }
         }
@@ -1418,7 +1427,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
       mainTimeline.addLabel(`step-${thisStep}`, "+=0");
       mainTimeline.call(() => {
         currentStepRef.current = thisStep;
-        setStepDescription(`Element at position ${sortedIndex} (${arr[sortedIndex]}) is now in its final sorted position`);
+        setStepDescription(
+          `Element at position ${sortedIndex} (${arr[sortedIndex]}) is now in its final sorted position`,
+        );
       });
       mainTimeline.add(animateSortedIndicator(sortedIndex), "+=0");
       stepIndex++;
@@ -1429,7 +1440,9 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
     mainTimeline.addLabel(`step-${thisStep}`);
     mainTimeline.call(() => {
       currentStepRef.current = thisStep;
-      setStepDescription(`Element at position 0 (${arr[0]}) is now in its final sorted position`);
+      setStepDescription(
+        `Element at position 0 (${arr[0]}) is now in its final sorted position`,
+      );
     });
     // stepIndex++
     mainTimeline.add(animateSortedIndicator(0), "+=0.3");
@@ -1442,7 +1455,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
           duration: 0.5,
           ease: "power1.out",
         }),
-        "+=0.5"
+        "+=0.5",
       );
       mainTimeline.add(
         gsap.to(jArrowRef.current, {
@@ -1450,7 +1463,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
           duration: 0.5,
           ease: "power1.out",
         }),
-        "-=0.5"
+        "-=0.5",
       );
     }
 
@@ -1461,7 +1474,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
     totalStepsRef.current = stepIndex;
     mainTimeline.addLabel("end");
-    
+
     mainTimeline.call(() => {
       setStepDescription("Sorting completed! All elements are in sorted order");
     });
@@ -1506,14 +1519,14 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
             }
             wasPausedRef.current = false;
           }, 0);
-        }
+        },
       );
     } else {
       if (currentStepRef.current <= totalStepsRef.current) {
         (timelineRef.current as gsap.core.Timeline).play();
         currentStepRef.current++;
         (timelineRef.current as gsap.core.Timeline).addPause(
-          `step-${currentStepRef.current}`
+          `step-${currentStepRef.current}`,
         );
       } else {
         (timelineRef.current as gsap.core.Timeline).play();
@@ -1557,7 +1570,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
       // Restore original array order based on the original array prop
       // This version handles duplicates by matching both value and DOM order
       const originalOrder: (HTMLDivElement | null)[] = new Array(
-        array.length
+        array.length,
       ).fill(null);
       const used = new Array(array.length).fill(false);
 
@@ -1751,7 +1764,7 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
               }}
             >
               <Image
-                src="/Images/BubbbleImage.png"
+                src="/Images/Bubble.png"
                 alt="swap indicator"
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
@@ -1861,19 +1874,19 @@ const BubbleSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
           {/* Step Description - ADDED THIS SECTION */}
         </div>
-          <div 
-            className="step-description"
-            style={{
-              minHeight: "40px",
-              fontSize: "16px",
-              fontWeight: "500",
-              textAlign: "center",
-              marginBottom: "5rem",
-              color: "#495057",
-            }}
-          >
-            {stepDescription}
-          </div>
+        <div
+          className="step-description"
+          style={{
+            minHeight: "40px",
+            fontSize: "16px",
+            fontWeight: "500",
+            textAlign: "center",
+            marginBottom: "5rem",
+            color: "#495057",
+          }}
+        >
+          {stepDescription}
+        </div>
       </div>
 
       {/* Controls */}

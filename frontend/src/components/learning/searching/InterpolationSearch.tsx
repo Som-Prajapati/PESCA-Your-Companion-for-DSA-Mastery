@@ -136,7 +136,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     element: HTMLElement,
     toX: number | string,
     toY: number | string = 0,
-    duration: number = 0.7
+    duration: number = 0.7,
   ): gsap.core.Tween => {
     return gsap.to(element, {
       x: toX,
@@ -181,7 +181,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
   };
 
   const animateSortedIndicator = (
-    indices: number | number[]
+    indices: number | number[],
   ): gsap.core.Timeline => {
     const targetIndices = Array.isArray(indices) ? indices : [indices];
     const elements = targetIndices
@@ -201,7 +201,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
           duration: 0.5,
           ease: "power2.out",
         },
-        0
+        0,
       );
     });
 
@@ -227,7 +227,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
   const teleportToPosition = (
     searchCircle: HTMLElement,
     targetIndex: number,
-    duration: number = 0.8
+    duration: number = 0.8,
   ): gsap.core.Timeline => {
     const timeline = gsap.timeline();
 
@@ -281,11 +281,11 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     target: number,
     lowValue: number,
     highValue: number,
-    calculatedPos: number
+    calculatedPos: number,
   ): gsap.core.Timeline => {
     const timeline = gsap.timeline();
     const formulaElement = containerRef.current?.querySelector(
-      ".interpolation-formula"
+      ".interpolation-formula",
     ) as HTMLElement;
 
     if (formulaElement) {
@@ -337,7 +337,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     high: number,
     target: number,
     lowValue: number,
-    highValue: number
+    highValue: number,
   ): number => {
     // Implement interpolation formula: pos = low + [(target - arr[low]) / (arr[high] - arr[low])] * (high - low)
     if (highValue === lowValue) return low; // Avoid division by zero
@@ -414,8 +414,8 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             opacity: 1,
             duration: 0.4,
             ease: "power1.out",
-          }
-        )
+          },
+        ),
       );
       // high arrow at index n-1
       mainTimeline.add(
@@ -432,9 +432,9 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             opacity: 1,
             duration: 0.4,
             ease: "power1.out",
-          }
+          },
         ),
-        "-=0.4"
+        "-=0.4",
       );
     }
 
@@ -455,7 +455,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         isAscending ? high : low,
         searchTarget,
         isAscending ? arr[low] : arr[high],
-        isAscending ? arr[high] : arr[low]
+        isAscending ? arr[high] : arr[low],
       );
       mainTimeline.add(gsap.to({}, { duration: 0.2 }));
 
@@ -473,9 +473,9 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             searchTarget,
             isAscending ? arr[low] : arr[high],
             isAscending ? arr[high] : arr[low],
-            pos
+            pos,
           ),
-          "+=0.2"
+          "+=0.2",
         );
       }
 
@@ -510,7 +510,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         // In descending, icon is already at last index (min), so just highlight it
         if (searchIconRef.current) {
           mainTimeline.add(
-            teleportToPosition(searchIconRef.current, n - 1, 0.8)
+            teleportToPosition(searchIconRef.current, n - 1, 0.8),
           );
         }
         // Add highlight for if/else if/else checks before return null
@@ -577,7 +577,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         isAscending ? high : low,
         searchTarget,
         isAscending ? arr[low] : arr[high],
-        isAscending ? arr[high] : arr[low]
+        isAscending ? arr[high] : arr[low],
       );
 
       mainTimeline.add(gsap.to({}, { duration: 0.2 }));
@@ -596,9 +596,9 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             searchTarget,
             isAscending ? arr[low] : arr[high],
             isAscending ? arr[high] : arr[low],
-            pos
+            pos,
           ),
-          "+=0.2"
+          "+=0.2",
         );
       }
 
@@ -607,7 +607,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
       if (isAscending) {
         if (searchIconRef.current) {
           mainTimeline.add(
-            teleportToPosition(searchIconRef.current, n - 1, 0.8)
+            teleportToPosition(searchIconRef.current, n - 1, 0.8),
           );
         }
 
@@ -701,7 +701,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         high,
         searchTarget,
         arr[low],
-        arr[high]
+        arr[high],
       );
       console.log(pos);
 
@@ -719,9 +719,9 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             searchTarget,
             arr[low],
             arr[high],
-            pos
+            pos,
           ),
-          "+=0.2"
+          "+=0.2",
         );
       }
 
@@ -729,7 +729,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
       if (searchIconRef.current) {
         mainTimeline.add(
           teleportToPosition(searchIconRef.current, pos, 0.8),
-          "+=0.3"
+          "+=0.3",
         );
       }
 
@@ -790,8 +790,8 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
                 lowArrowRef.current,
                 low * TOTAL_BOX_SPACING + ARROW_X_OFFSET,
                 "+=0",
-                0.3
-              )
+                0.3,
+              ),
             );
             // Add step tracking
             const thisStep = stepIndex;
@@ -824,8 +824,8 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
                 highArrowRef.current,
                 high * TOTAL_BOX_SPACING + ARROW_X_OFFSET,
                 "+=0",
-                0.3
-              )
+                0.3,
+              ),
             );
             // Add step tracking
             const thisStep = stepIndex;
@@ -860,8 +860,8 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
                 lowArrowRef.current,
                 low * TOTAL_BOX_SPACING + ARROW_X_OFFSET,
                 "+=0",
-                0.3
-              )
+                0.3,
+              ),
             );
             // Add step tracking
             const thisStep = stepIndex;
@@ -894,8 +894,8 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
                 highArrowRef.current,
                 high * TOTAL_BOX_SPACING + ARROW_X_OFFSET,
                 "+=0",
-                0.3
-              )
+                0.3,
+              ),
             );
           }
           // Add step tracking
@@ -972,7 +972,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             }
             wasPausedRef.current = false;
           }, 0);
-        }
+        },
       );
       // setIsPlaying(false);
     } else {
@@ -980,7 +980,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         (timelineRef.current as gsap.core.Timeline).play();
         currentStepRef.current++;
         (timelineRef.current as gsap.core.Timeline).addPause(
-          `step-${currentStepRef.current}`
+          `step-${currentStepRef.current}`,
         );
       } else {
         (timelineRef.current as gsap.core.Timeline).play();
@@ -1024,7 +1024,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
       // Restore original array order based on the original array prop
       const originalOrder: (HTMLDivElement | null)[] = new Array(
-        array.length
+        array.length,
       ).fill(null);
       const used = new Array(array.length).fill(false);
 
@@ -1069,7 +1069,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
     // Reset interpolation formula
     const formulaElement = containerRef.current?.querySelector(
-      ".interpolation-formula"
+      ".interpolation-formula",
     ) as HTMLElement;
     if (formulaElement) {
       gsap.set(formulaElement, {
@@ -1157,7 +1157,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
   };
 
   const handleSearchTargetChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     const value = e.target.value;
     setSearchTargetInput(value);
@@ -1257,7 +1257,7 @@ const InterpolationSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
               }}
             >
               <Image
-                src="/Images/SearchImage.png"
+                src="/Images/Search.png"
                 alt="search indicator"
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}

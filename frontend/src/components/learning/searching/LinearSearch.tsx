@@ -127,7 +127,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     element: HTMLElement,
     toX: number | string,
     toY: number | string = 0,
-    duration: number = 0.5
+    duration: number = 0.5,
   ): gsap.core.Tween => {
     return gsap.to(element, {
       x: toX,
@@ -175,7 +175,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
   // Sorted indicator animation
   const animateSortedIndicator = (
-    indices: number | number[]
+    indices: number | number[],
   ): gsap.core.Timeline => {
     const targetIndices = Array.isArray(indices) ? indices : [indices];
     const elements = targetIndices
@@ -195,7 +195,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
           duration: 0.5,
           ease: "power2.out",
         },
-        0
+        0,
       );
     });
 
@@ -256,7 +256,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     y1: number,
     x2: number,
     y2: number,
-    duration: number = 1
+    duration: number = 1,
   ): gsap.core.Timeline => {
     const timeline = gsap.timeline();
 
@@ -313,7 +313,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
           // Use GSAP's set method for consistent transforms
           gsap.set(elementA, { x, y });
         },
-      }
+      },
     );
 
     // Landing animation - slight bounce
@@ -339,7 +339,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         duration: landDuration,
         ease: "power2.out",
       },
-      reactionStart
+      reactionStart,
     );
 
     timeline.to(elementB, {
@@ -427,7 +427,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         const tl = fadeOutBoxText(idx, 0.6);
         tl.delay(idx * 0.1);
         return tl;
-      })
+      }),
     );
 
     // Simple linear search animation
@@ -441,9 +441,9 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             searchIconRef.current,
             `+=${TOTAL_BOX_SPACING}`,
             0,
-            0.4
+            0.4,
           ),
-          "+=0.4"
+          "+=0.4",
         );
       }
 
@@ -532,7 +532,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             }
             wasPausedRef.current = false;
           }, 0);
-        }
+        },
       );
       // setIsPlaying(false);
     } else {
@@ -540,7 +540,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
         (timelineRef.current as gsap.core.Timeline).play();
         currentStepRef.current++;
         (timelineRef.current as gsap.core.Timeline).addPause(
-          `step-${currentStepRef.current}`
+          `step-${currentStepRef.current}`,
         );
       } else {
         (timelineRef.current as gsap.core.Timeline).play();
@@ -593,7 +593,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
       // Restore original array order based on the original array prop
       // This version handles duplicates by matching both value and DOM order
       const originalOrder: (HTMLDivElement | null)[] = new Array(
-        array.length
+        array.length,
       ).fill(null);
       const used = new Array(array.length).fill(false);
 
@@ -704,7 +704,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
 
   // Modified: On change in jumpsize or targetelement use reset animation
   const handleSearchTargetChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     const value = e.target.value;
     setSearchTargetInput(value);
@@ -808,7 +808,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
             >
               <Image
                 // ref={searchIconRef}
-                src="/Images/SearchImage.png"
+                src="/Images/Search.png"
                 alt="search indicator"
                 width={IMAGE_WIDTH}
                 height={IMAGE_HEIGHT}
