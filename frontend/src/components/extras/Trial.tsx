@@ -57,6 +57,7 @@ const SelectionSort: React.FC = () => {
   const wasPausedRef = useRef<boolean>(false);
   const propsRef = useRef({ array, speed, isAscending, isPlaying });
 
+  // ???sommm
   // Add refs for step management
   const currentStepRef = useRef<number>(0);
   const totalStepsRef = useRef<number>(0);
