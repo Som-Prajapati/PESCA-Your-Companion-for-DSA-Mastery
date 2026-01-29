@@ -311,10 +311,14 @@ const SelectionSort: React.FC<SidebarProps> = ({ isOpen, width }) => {
         if (minArrowRef.current && jArrowRef.current) {
           mainTimeline.add(hideArrow(minArrowRef.current, 0.5));
           mainTimeline.add(hideArrow(jArrowRef.current, 0.5), "-=0.5");
-          mainTimeline.to([minArrowRef.current, jArrowRef.current], {
-            opacity: 0,
-            duration: 0,
-          });
+          mainTimeline.to(
+            [minArrowRef.current, jArrowRef.current],
+            {
+              opacity: 0,
+              duration: 0,
+            },
+            "-=0.5",
+          );
         }
 
         // Swap array values
