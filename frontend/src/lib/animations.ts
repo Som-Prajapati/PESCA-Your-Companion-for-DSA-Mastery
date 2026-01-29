@@ -1,5 +1,19 @@
 import gsap from "gsap";
 
+// * ANIMATION LIBRARY - 24 Functions
+//  *
+//  * MOVEMENT (5): slideElementTo, fadeIn, fadeOut, scaleUp, scaleDown
+//  * HIGHLIGHTING (8): highlight, highlightRed, highlightBlue, highlightGreen,
+//  *                   removeHighlight, greyOut, markAsSorted, highlightBoxes
+//  * SWAP (4): simpleSwap, eclipseSwap, scaleSwap, arcSwap
+//  * TEXT (2): fadeInText, fadeOutText
+//  * ARROW (3): showArrow, hideArrow, moveArrow
+//  * UTILITY (2): resetElement, pause
+//  */
+
+
+
+
 /**
  * Shared GSAP animation functions for algorithm visualizations.
  * These are universal animations that can be used across different algorithms.
@@ -266,22 +280,31 @@ export const simpleSwap = (
   return timeline;
 };
 
+
 /**
  * Eclipse swap animation (elements swap in upper/lower arcs)
  */
 export const eclipseSwap = (
-  elementA: HTMLElement,
-  elementB: HTMLElement,
+  arrayElementsRef : React.RefObject<(HTMLDivElement | null)[]>,
+  elementA: HTMLDivElement | null,
+  elementB: HTMLDivElement | null,
   eclipseHeight: number = 80,
   duration: number = 1.2,
+  TOTAL_BOX_SPACING : number,
 ): gsap.core.Timeline => {
   const timeline = gsap.timeline();
 
-  const currentXA = gsap.getProperty(elementA, "x") as number;
-  const currentXB = gsap.getProperty(elementB, "x") as number;
+  const indexA = arrayElementsRef.current.findIndex((el : HTMLDivElement | null) => el === elementA);
+  const indexB = arrayElementsRef.current.findIndex((el : HTMLDivElement | null) => el === elementB);
 
-  const distance = currentXB - currentXA;
-  const midPoint = distance / 2;
+  timeline.call(() => { 
+
+    const currentXA = gsap.getProperty(elementA, "x") as number;
+    const currentXB = gsap.getProperty(elementB, "x") as number;
+    
+    const distance = (indexB - indexA) * TOTAL_BOX_SPACING;
+    const midPoint = distance / 2;
+  console.log(distance , currentXA ,currentXB)
 
   // Element A moves in upper arc with flip
   timeline
@@ -307,9 +330,9 @@ export const eclipseSwap = (
       },
       duration / 2,
     );
-
-  // Element B moves in lower arc with flip
-  timeline
+    
+    // Element B moves in lower arc with flip
+    timeline
     .to(
       elementB,
       {
@@ -332,18 +355,19 @@ export const eclipseSwap = (
       },
       duration / 2,
     );
+  })
 
-  // Reset rotation
-  timeline.call(() => {
+    // Reset rotation
+    timeline.call(() => {
     gsap.set([elementA, elementB], { rotation: 0 });
   });
-
+  
   return timeline;
 };
 
 /**
  * Arc swap animation (both elements go up and swap)
- */
+*/
 export const arcSwap = (
   elementA: HTMLElement,
   elementB: HTMLElement,
@@ -530,4 +554,142 @@ export const resetElement = (element: HTMLElement): void => {
  */
 export const pause = (duration: number = 0.3): gsap.core.Tween => {
   return gsap.to({}, { duration });
+};
+
+
+/**
+ * Scale swap animation (for bubble sort - elements scale while swapping)
+ */
+export const scaleSwap = (
+  arrayElementsRef: React.MutableRefObject<(HTMLDivElement | null)[]>,
+  elementA: HTMLDivElement,
+  elementB: HTMLDivElement,
+  duration: number = 1.2,
+  TOTAL_BOX_SPACING: number,
+): gsap.core.Timeline => {
+  const timeline = gsap.timeline();
+
+  timeline.call(() => {
+    const indexA = arrayElementsRef.current.findIndex((el) => el === elementA);
+    const indexB = arrayElementsRef.current.findIndex((el) => el === elementB);
+
+    if (indexA === -1 || indexB === -1) {
+      return;
+    }
+
+    // Swap refs
+    const temp = arrayElementsRef.current[indexA];
+    arrayElementsRef.current[indexA] = arrayElementsRef.current[indexB];
+    arrayElementsRef.current[indexB] = temp;
+
+    const currentXA = gsap.getProperty(elementA, "x") as number;
+    const currentXB = gsap.getProperty(elementB, "x") as number;
+    const distance = (indexB - indexA) * TOTAL_BOX_SPACING;
+
+    // Store original z-index values
+    const originalZIndexA = elementA.style.zIndex || "auto";
+    const originalZIndexB = elementB.style.zIndex || "auto";
+
+    // Set z-index: left element (A) higher than right element (B)
+    gsap.set(elementA, { zIndex: 1001 });
+    gsap.set(elementB, { zIndex: 1000 });
+
+    // Element A (left) scales up, moves right to midpoint, then scales back to normal
+    gsap.to(elementA, {
+      scale: 1.5,
+      x: currentXA + distance / 2,
+      duration: duration / 2,
+      ease: "power2.out",
+    });
+
+    gsap.to(elementA, {
+      scale: 1,
+      x: currentXA + distance,
+      duration: duration / 2,
+      ease: "power2.in",
+      delay: duration / 2,
+    });
+
+    // Element B (right) scales down, moves left to midpoint, then scales back to normal
+    gsap.to(elementB, {
+      scale: 0.5,
+      x: currentXB - distance / 2,
+      duration: duration / 2,
+      ease: "power2.out",
+    });
+
+    gsap.to(elementB, {
+      scale: 1,
+      x: currentXB - distance,
+      duration: duration / 2,
+      ease: "power2.in",
+      delay: duration / 2,
+      onComplete: () => {
+        // Reset z-index back to original values
+        gsap.set(elementA, {
+          scale: 1,
+          zIndex: originalZIndexA === "auto" ? "auto" : originalZIndexA,
+        });
+        gsap.set(elementB, {
+          scale: 1,
+          zIndex: originalZIndexB === "auto" ? "auto" : originalZIndexB,
+        });
+      },
+    });
+  });
+
+  // Add duration to timeline so it waits for the swap to complete
+  timeline.to({}, { duration: duration });
+
+  return timeline;
+};
+
+/**
+ * Highlight boxes with glow effect (for comparisons)
+ */
+export const highlightBoxes = (
+  arrayElementsRef: React.MutableRefObject<(HTMLDivElement | null)[]>,
+  indices: number | number[],
+  intensity: "low" | "high" = "low",
+  duration: number = 0.6,
+): gsap.core.Timeline => {
+  const targetIndices = Array.isArray(indices) ? indices : [indices];
+  const elements = targetIndices
+    .map((index) => arrayElementsRef.current[index])
+    .filter((el): el is HTMLDivElement => el instanceof HTMLDivElement);
+
+  if (elements.length === 0) return gsap.timeline();
+
+  const timeline = gsap.timeline();
+  const shadowConfig = {
+    low: "0 0 10px #ffd700, 0 2px 15px rgba(255, 215, 0, 0.3)",
+    high: "0 0 25px #ff4444, 0 4px 30px rgba(255, 68, 68, 0.5)",
+  };
+
+  const glowShadow = shadowConfig[intensity];
+  const originalBoxShadow = "0 2px 8px rgba(0, 0, 0, 0.08)";
+
+  elements.forEach((element) => {
+    timeline
+      .to(
+        element,
+        {
+          boxShadow: glowShadow,
+          duration: duration / 2,
+          ease: "power2.out",
+        },
+        0,
+      )
+      .to(
+        element,
+        {
+          boxShadow: originalBoxShadow,
+          duration: duration / 2,
+          ease: "power2.in",
+        },
+        duration / 2,
+      );
+  });
+
+  return timeline;
 };
