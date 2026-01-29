@@ -2,10 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
 import SearchingControls from "./SearchingControl";
-import { MotionPathPlugin } from "gsap/MotionPathPlugin";
-import { Search } from "lucide-react";
 
 // Constants for sizing
 const getDynamicSizing = (arrayLength: number) => {
@@ -59,7 +56,7 @@ interface SidebarProps {
   width: number;
 }
 
-const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
+const LinearSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
   // Fixed initial array to prevent hydration mismatch
   const getFixedInitialArray = () => [8, 17, 25, 31, 42, 65, 75, 89];
   const initialArray = getFixedInitialArray();
@@ -137,7 +134,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
     });
   };
 
-  const highlightBoxe = (index: number): gsap.core.Timeline => {
+  const highlightBoxes = (index: number): gsap.core.Timeline => {
     const element = arrayElementsRef.current[index];
     if (!element) return gsap.timeline();
 
@@ -218,134 +215,6 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
       borderColor: "#cccccc",
       duration: 0.3,
       ease: "power2.out",
-    });
-
-    return timeline;
-  };
-
-  /**
-   * Animates an element to "jump" from (x1, y1) to (x2, y2) in a half-ellipse arc,
-   * leaving a trail of cloud particles along the path.
-   * @param element The DOM element to animate.
-   * @param x1 Starting x position (relative to parent/container).
-   * @param y1 Starting y position.
-   * @param x2 Ending x position.
-   * @param y2 Ending y position.
-   * @param duration Animation duration in seconds.
-   * @param trailCount Number of cloud particles to spawn along the path.
-   * @returns GSAP timeline for the animation.
-   */
-  /**
-   * Animates the search icon (elementA) to "jump" from (x1, y1) to (x2, y2) in a half-ellipse arc,
-   * leaving a trail of cloud particles along the path. When the search icon lands,
-   * animates elementB (the target array box) down and up once.
-   * @param elementA The search icon DOM element to animate.
-   * @param elementB The array box DOM element to animate when elementA lands.
-   * @param x1 Starting x position (relative to parent/container).
-   * @param y1 Starting y position.
-   * @param x2 Ending x position.
-   * @param y2 Ending y position.
-   * @param duration Animation duration in seconds.
-   * @param trailCount Number of cloud particles to spawn along the path.
-   * @returns GSAP timeline for the animation.
-   */
-  const jumpWithCloudTrail = (
-    elementA: HTMLElement,
-    elementB: HTMLElement,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    duration: number = 1,
-  ): gsap.core.Timeline => {
-    const timeline = gsap.timeline();
-
-    // Calculate distance and dynamic arc height
-    const distance = Math.abs(x2 - x1);
-    const baseHeight = 80; // minimum arc height for short jumps
-    const heightMultiplier = 0.4; // scales with distance
-    const arcHeight = baseHeight + distance * heightMultiplier;
-
-    // Calculate ellipse parameters for upper half-ellipse (arc)
-    const cx = (x1 + x2) / 2; // center X
-    const cy = Math.min(y1, y2) - arcHeight; // center Y (above the lower point)
-    const a = distance / 2; // horizontal radius
-    const b = arcHeight; // vertical radius
-
-    // Set initial position using transforms only (more reliable)
-    timeline.set(elementA, {
-      x: x1,
-      y: y1,
-      transformOrigin: "center center",
-    });
-
-    // Helper to get point on upper half-ellipse for t in [0,1]
-    const getEllipsePoint = (t: number) => {
-      // For upper half of ellipse, theta goes from π to 0 (or 180° to 0°)
-      const theta = Math.PI * (1 + t);
-      const x = cx + a * Math.cos(theta);
-      const y = cy + b * Math.sin(theta);
-      return { x, y };
-    };
-
-    // Calculate proportional timing
-    const prepDuration = duration * 0.15; // 15% for pre-jump
-    const jumpDuration = duration * 0.7; // 70% for main jump
-    const landDuration = duration * 0.15; // 15% for landing
-
-    // Pre-jump animation - slight crouch
-    timeline.to(elementA, {
-      y: y1 + 15, // slight downward movement
-      duration: prepDuration,
-      ease: "power2.out",
-    });
-
-    // Main jump animation along the elliptical arc
-    timeline.to(
-      {},
-      {
-        duration: jumpDuration,
-        ease: "power1.inOut",
-        onUpdate: function (this: gsap.core.Tween) {
-          const progress = this.progress();
-          const { x, y } = getEllipsePoint(progress);
-
-          // Use GSAP's set method for consistent transforms
-          gsap.set(elementA, { x, y });
-        },
-      },
-    );
-
-    // Landing animation - slight bounce
-    timeline.to(elementA, {
-      y: y2 + 10, // slight overshoot
-      duration: landDuration / 2,
-      ease: "power2.in",
-    });
-
-    timeline.to(elementA, {
-      y: y2, // settle to final position
-      duration: landDuration / 2,
-      ease: "bounce.out",
-    });
-
-    // Element B reaction animation (when elementA lands)
-    const reactionStart = duration - landDuration * 1.2;
-
-    timeline.to(
-      elementB,
-      {
-        y: Math.min(50, distance * 0.2), // reaction scales with jump distance
-        duration: landDuration,
-        ease: "power2.out",
-      },
-      reactionStart,
-    );
-
-    timeline.to(elementB, {
-      y: 0,
-      duration: landDuration,
-      ease: "bounce.out",
     });
 
     return timeline;
@@ -455,7 +324,7 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
       });
 
       // Highlight the current box
-      mainTimeline.add(highlightBoxe(i), "-=0.2");
+      mainTimeline.add(highlightBoxes(i), "-=0.2");
       mainTimeline.add(removeHighlight(i), "+=0.5");
 
       // Move the search icon above the current box
@@ -938,4 +807,4 @@ const JumpSearch: React.FC<SidebarProps> = ({ isOpen, width }) => {
   );
 };
 
-export default JumpSearch;
+export default LinearSearch;

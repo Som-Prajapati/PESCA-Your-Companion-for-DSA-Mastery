@@ -1,8 +1,8 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
-import Controls from "../../extras/Control";
 import SortingControls from "./SortingControl";
+import { slideElementTo, markAsSorted, highlightBoxes } from "@/lib/animations";
 
 const getDynamicSizing = (arrayLength: number) => {
   if (arrayLength <= 9) {
@@ -73,7 +73,7 @@ const InsertionSort: React.FC<SidebarProps> = ({
   // Add refs for step management
   const currentStepRef = useRef<number>(0);
   const totalStepsRef = useRef<number>(0);
-  const tabTitles = ["Selection Sort"] as const;
+  const tabTitles = ["Insertion Sort"] as const;
   const showPseudoCode = 0;
   const pseudoCode = [
     [
@@ -105,119 +105,6 @@ const InsertionSort: React.FC<SidebarProps> = ({
     ARROW_Y_OFFSET_DOWN,
     ARROW_X_OFFSET,
   } = dynamicSizing;
-
-  // Animates an element from its current position to (toX, toY) over the given duration.
-  const slideElementTo = (
-    element: HTMLElement,
-    toX: number | string,
-    toY: number | string = 0,
-    duration: number = 0.5,
-  ): gsap.core.Tween => {
-    return gsap.to(element, {
-      x: toX,
-      y: toY,
-      duration,
-      ease: "power1.inOut",
-    });
-  };
-
-  // Sorted indicator animation
-  const animateSortedIndicator = (
-    indices: number | number[],
-  ): gsap.core.Timeline => {
-    const targetIndices = Array.isArray(indices) ? indices : [indices];
-    const elements = targetIndices
-      .map((index) => arrayElementsRef.current[index])
-      .filter((el): el is HTMLDivElement => el instanceof HTMLDivElement);
-
-    if (elements.length === 0) return gsap.timeline();
-
-    const timeline = gsap.timeline();
-
-    elements.forEach((element) => {
-      timeline.to(
-        element,
-        {
-          backgroundColor: "#d4edda",
-          borderColor: "#c3e6cb",
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        0,
-      );
-    });
-
-    return timeline;
-  };
-
-  // Highlight boxes animation
-  const highlightBoxes = (
-    indices: number | number[],
-    intensity: "low" | "high" = "low",
-    duration: number = 0.6,
-  ): gsap.core.Timeline => {
-    const targetIndices = Array.isArray(indices) ? indices : [indices];
-    const elements = targetIndices
-      .map((index) => arrayElementsRef.current[index])
-      .filter((el): el is HTMLDivElement => el instanceof HTMLDivElement);
-
-    if (elements.length === 0) return gsap.timeline();
-
-    const timeline = gsap.timeline();
-    const shadowConfig = {
-      low: "0 0 10px #ffd700, 0 2px 15px rgba(255, 215, 0, 0.3)",
-      high: "0 0 25px rgb(235, 167, 22), 0 4px 30px rgb(247, 155, 15)",
-    };
-
-    const glowShadow = shadowConfig[intensity];
-    const originalBoxShadow = "0 2px 8px rgba(0, 0, 0, 0.08)";
-
-    // Color configurations for different intensities
-    const colorConfig = {
-      low: {
-        backgroundColor: "#fff3cd",
-        borderColor: "orange",
-      },
-      high: {
-        backgroundColor: "rgb(246, 222, 178)",
-        borderColor: "red",
-      },
-    };
-
-    const highlightColors = colorConfig[intensity];
-    const originalColors = {
-      backgroundColor: "#f8f9fa",
-      borderColor: "#e9ecef",
-    };
-
-    elements.forEach((element) => {
-      timeline
-        .to(
-          element,
-          {
-            boxShadow: glowShadow,
-            backgroundColor: highlightColors.backgroundColor,
-            borderColor: highlightColors.borderColor,
-            duration: duration / 2,
-            ease: "power2.out",
-          },
-          0,
-        )
-        .to(
-          element,
-          {
-            boxShadow: originalBoxShadow,
-            backgroundColor: originalColors.backgroundColor,
-            borderColor: originalColors.borderColor,
-            duration: duration / 2,
-            ease: "power2.in",
-          },
-          duration / 2,
-        );
-    });
-
-    return timeline;
-  };
 
   const handleToggleCodePanel = () => {
     setShowCodePanel(!showCodePanel);
@@ -426,7 +313,10 @@ const InsertionSort: React.FC<SidebarProps> = ({
         stepIndex++;
 
         // Highlight comparison elements
-        mainTimeline.add(highlightBoxes([j, j + 1], "high"), "+=0.1");
+        mainTimeline.add(
+          highlightBoxes(arrayElementsRef, [j, j + 1], "high"),
+          "+=0.1",
+        );
 
         arr[j + 1] = arr[j];
         j = j - 1;
@@ -499,7 +389,10 @@ const InsertionSort: React.FC<SidebarProps> = ({
       const elem0 = arrayElementsRef.current[0] as HTMLElement | undefined;
       const y0 = elem0 ? gsap.getProperty(elem0, "y") : 0;
       if (y0 !== 0) {
-        mainTimeline.add(highlightBoxes([j, j + 1], "high"), "-=0.1");
+        mainTimeline.add(
+          highlightBoxes(arrayElementsRef, [j, j + 1], "high"),
+          "-=0.1",
+        );
       }
       mainTimeline.add(gsap.to({}, { duration: 0.2 }));
 
@@ -569,7 +462,11 @@ const InsertionSort: React.FC<SidebarProps> = ({
 
     // Final sorted animation
     mainTimeline.add(
-      animateSortedIndicator([...Array(arr.length).keys()]),
+      markAsSorted(
+        arrayElementsRef.current.filter(
+          (el): el is HTMLDivElement => el !== null,
+        ),
+      ),
       "-=0.5",
     );
 
@@ -620,7 +517,6 @@ const InsertionSort: React.FC<SidebarProps> = ({
           }, 0);
         },
       );
-      // setIsPlaying(false);
     } else {
       if (currentStepRef.current <= totalStepsRef.current) {
         (timelineRef.current as gsap.core.Timeline).play();
@@ -668,7 +564,6 @@ const InsertionSort: React.FC<SidebarProps> = ({
       });
 
       // Restore original array order based on the original array prop, handling duplicates
-      // We use a map of value to a queue of elements, so each duplicate is matched in order
       const valueToElements: Map<number, HTMLDivElement[]> = new Map();
       arrayElementsRef.current.forEach((element) => {
         if (element) {
@@ -728,9 +623,7 @@ const InsertionSort: React.FC<SidebarProps> = ({
       const temp = propsRef.current.speed;
       timelineRef.current.timeScale(propsRef.current.speed * 4);
 
-      // Increase the animation speed by increasing the timeScale of the timeline
       timelineRef.current.reverse();
-      // timelineRef.current.seek(prevLabel);
       timelineRef.current.pause(prevLabel);
       if (timelineRef.current) {
         timelineRef.current.timeScale(temp);
@@ -742,7 +635,7 @@ const InsertionSort: React.FC<SidebarProps> = ({
             timelineRef.current.play();
           }
           wasPausedRef.current = false;
-        }, 100); // Add a 100ms delay before playing
+        }, 100);
       }
     }
   };
@@ -827,7 +720,6 @@ const InsertionSort: React.FC<SidebarProps> = ({
             gap: "2rem",
             padding: "2rem",
             fontFamily: "system-ui, -apple-system, sans-serif",
-            // backgroundColor: "#ffffff",
             color: "#1a1a1a",
             minHeight: "400px",
             zIndex: 0,
@@ -858,14 +750,14 @@ const InsertionSort: React.FC<SidebarProps> = ({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#ffffffff",
+                  backgroundColor: "#f8f9fa",
                   border: "2px solid #e9ecef",
                   borderRadius: `${BOX_BORDER_RADIUS}px`,
                   fontSize: `${BOX_FONT_SIZE}px`,
                   fontWeight: "600",
                   color: "#212529",
                   transition: "all 0.3s ease",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                   zIndex: 2,
                 }}
               >
